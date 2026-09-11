@@ -877,6 +877,7 @@ MonoBehaviour:
   referenceCamera: {fileID: 0}
   centerThreshold: 0.5
   highThreshold: 0.6
+  maxRange: 1.5
 --- !u!1 &1110701769
 GameObject:
   m_ObjectHideFlags: 0
@@ -1166,7 +1167,7 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: ea695cafc1cf6894b8dfc676113510ca, type: 2}
     - target: {fileID: 5866666021909216657, guid: 6ed9d71957b4fff4c8c2c6503bf94920, type: 3}
       propertyPath: m_ApplyRootMotion
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
