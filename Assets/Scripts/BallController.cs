@@ -7,6 +7,7 @@ public class BallController : MonoBehaviour
     public float flightDuration = 0.6f;
     public float resetDelay = 0.5f;
     public GoalNet goalNet;             // 도착 시 출렁일 그물 (비워두면 생략)
+    public ParticleSystem launchEffect; // 차는 순간 재생할 이펙트 (비워두면 생략)
     public ParticleSystem arrivalEffect; // 도착 시 재생할 이펙트 (비워두면 생략)
 
     [Header("화려함")]
@@ -30,6 +31,9 @@ public class BallController : MonoBehaviour
     IEnumerator ShootRoutine()
     {
         Vector3 to = targetPoint != null ? targetPoint.position : startPosition + Vector3.forward * 10f;
+
+        if (launchEffect != null)
+            launchEffect.Play();
 
         float t = 0f;
         while (t < flightDuration)
