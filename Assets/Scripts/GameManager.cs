@@ -12,10 +12,18 @@ public class GameManager : MonoBehaviour
     public float bobScale = 0.08f;   // 리듬 탈 때 커지는 정도 (작을수록 은은함)
     public Transform goalkeeper;         // 준비 자세로 같이 들썩일 골키퍼 (비워두면 생략)
     public float goalkeeperBobScale = 0.05f;
+    public GoalkeeperController goalkeeperController; // 슛 방향으로 다이빙 반응 (비워두면 생략)
 
     [Header("Hit / Miss 반응")]
     public ParticleSystem hitEffect;  // 성공 판정 순간 이펙트 (비워두면 생략)
-    public BallController ball;       // 성공 시 골대로 날아갈 공 (비워두면 생략)
+
+    [Header("공")]
+    public GameObject ballPrefab;     // 박자마다 새로 생성할 공 프리팹
+    public Transform ballSpawnPoint;  // 공이 나타날 준비 위치 (캐릭터 발 앞)
+    public Transform ballTargetPoint; // 골대 안쪽 목표 지점 (씬 오브젝트라 프리팹에 저장 안 되므로 여기서 연결)
+    public GoalNet ballGoalNet;
+    public ParticleSystem ballLaunchEffect;
+    public ParticleSystem ballArrivalEffect;
 
     private Animator characterAnimator;
     private float beatInterval;
@@ -24,6 +32,7 @@ public class GameManager : MonoBehaviour
     private Vector3 characterOriginalScale;
     private Vector3 goalkeeperOriginalScale;
     private int combo = 0;
+    private BallController currentBall; // 지금 대기 중인, 아직 안 찬 공
 
     void Start()
     {
@@ -47,7 +56,25 @@ public class GameManager : MonoBehaviour
         songTime += Time.deltaTime;
 
         if (songTime - lastBeatTime >= beatInterval)
+        {
             lastBeatTime += beatInterval;
+
+            // 지난 박자 동안 아무 반응 없이 그냥 지나친 공은 자동으로 미스 처리
+            if (currentBall != null)
+            {
+                currentBall.Fumble();
+                currentBall = null;
+                combo = 0;
+
+                if (characterAnimator != null)
+                    characterAnimator.SetTrigger("miss");
+            }
+
+            SpawnBallIfNeeded();
+
+            if (currentBall != null)
+                currentBall.RollIn(beatInterval);
+        }
 
         Bob();
 
@@ -66,6 +93,23 @@ public class GameManager : MonoBehaviour
 
         if (goalkeeper != null)
             goalkeeper.localScale = goalkeeperOriginalScale * (1f + goalkeeperBobScale * bounce);
+    }
+
+    void SpawnBallIfNeeded()
+    {
+        if (currentBall != null) return; // 아직 안 찬 공이 있으면 새로 안 만듦
+        if (ballPrefab == null || ballSpawnPoint == null) return;
+
+        GameObject instance = Instantiate(ballPrefab, ballSpawnPoint.position, ballSpawnPoint.rotation);
+        currentBall = instance.GetComponent<BallController>();
+
+        if (currentBall != null)
+        {
+            currentBall.targetPoint = ballTargetPoint;
+            currentBall.goalNet = ballGoalNet;
+            currentBall.launchEffect = ballLaunchEffect;
+            currentBall.arrivalEffect = ballArrivalEffect;
+        }
     }
 
     void TryShoot()
@@ -93,8 +137,14 @@ public class GameManager : MonoBehaviour
     // 슛 애니메이션의 "발이 공에 닿는 프레임"에 Animation Event로 이 메서드를 호출
     public void LaunchBall()
     {
-        if (ball != null)
-            ball.Shoot();
+        if (currentBall == null) return;
+
+        currentBall.Shoot();
+
+        if (goalkeeperController != null)
+            goalkeeperController.React(currentBall.PlannedTarget);
+
+        currentBall = null; // 이 공은 골대 쪽에 남고, 다음 박자에 새 공이 생김
     }
 
     void Miss()
@@ -103,5 +153,11 @@ public class GameManager : MonoBehaviour
 
         if (characterAnimator != null)
             characterAnimator.SetTrigger("miss");
+
+        if (currentBall != null)
+        {
+            currentBall.Fumble();
+            currentBall = null; // 이 공도 빗나간 채로 남고, 다음 박자에 새 공이 생김
+        }
     }
 }
