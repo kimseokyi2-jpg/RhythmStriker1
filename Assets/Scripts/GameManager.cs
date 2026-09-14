@@ -25,6 +25,11 @@ public class GameManager : MonoBehaviour
     public int scorePerHit = 100;
     public int comboBonusPerHit = 10; // 콤보 1당 추가 점수
 
+    [Header("게임 오버")]
+    public int missLimit = 3;               // 연속 미스 허용 횟수
+    public float gameOverDisplayDuration = 3f;
+    public MenuManager menuManager;         // 게임오버 후 메인 메뉴로 돌려보낼 대상
+
     [Header("공")]
     public GameObject ballPrefab;     // 박자마다 새로 생성할 공 프리팹
     public Transform ballSpawnPoint;  // 공이 나타날 준비 위치 (캐릭터 발 앞)
@@ -45,6 +50,20 @@ public class GameManager : MonoBehaviour
     private BallController currentBall; // 지금 대기 중인, 아직 안 찬 공
     private Vector3 cameraOriginalPosition;
     private Coroutine cameraPunchRoutine;
+    private int missStreak = 0;
+    private bool isGameOver = false;
+
+    void OnEnable()
+    {
+        // 새 판이 시작될 때마다(메뉴에서 재활성화될 때마다) 상태 초기화
+        score = 0;
+        combo = 0;
+        maxCombo = 0;
+        missStreak = 0;
+        isGameOver = false;
+        songTime = 0f;
+        lastBeatTime = 0f;
+    }
 
     void Start()
     {
@@ -70,6 +89,8 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (isGameOver) return;
+
         songTime += Time.deltaTime;
 
         if (songTime - lastBeatTime >= beatInterval)
@@ -81,11 +102,10 @@ public class GameManager : MonoBehaviour
             {
                 currentBall.Fumble();
                 currentBall = null;
-                combo = 0;
-
-                if (characterAnimator != null)
-                    characterAnimator.SetTrigger("miss");
+                RegisterMiss();
             }
+
+            if (isGameOver) return;
 
             SpawnBallIfNeeded();
 
@@ -145,6 +165,7 @@ public class GameManager : MonoBehaviour
         combo++;
         if (combo > maxCombo) maxCombo = combo;
         score += scorePerHit + comboBonusPerHit * (combo - 1);
+        missStreak = 0;
 
         if (hitEffect != null)
             hitEffect.Play();
@@ -189,8 +210,6 @@ public class GameManager : MonoBehaviour
 
     void Miss()
     {
-        combo = 0;
-
         if (characterAnimator != null)
             characterAnimator.SetTrigger("miss");
 
@@ -199,9 +218,38 @@ public class GameManager : MonoBehaviour
             currentBall.Fumble();
             currentBall = null; // 이 공도 빗나간 채로 남고, 다음 박자에 새 공이 생김
         }
+
+        RegisterMiss();
+    }
+
+    // 미스(수동/자동) 공통 처리: 콤보 끊기, 연속 미스 카운트, 한도 도달 시 게임오버
+    void RegisterMiss()
+    {
+        combo = 0;
+        missStreak++;
+
+        if (missStreak >= missLimit)
+            TriggerGameOver();
+    }
+
+    void TriggerGameOver()
+    {
+        isGameOver = true;
+        StartCoroutine(GameOverRoutine());
+    }
+
+    IEnumerator GameOverRoutine()
+    {
+        yield return new WaitForSeconds(gameOverDisplayDuration);
+
+        if (menuManager != null)
+            menuManager.ShowMainMenu();
+
+        enabled = false;
     }
 
     private GUIStyle hudStyle;
+    private GUIStyle bigCenterStyle;
 
     void OnGUI()
     {
@@ -212,8 +260,26 @@ public class GameManager : MonoBehaviour
             hudStyle.normal.textColor = Color.white;
         }
 
+        if (bigCenterStyle == null)
+        {
+            bigCenterStyle = new GUIStyle(GUI.skin.label);
+            bigCenterStyle.fontSize = 42;
+            bigCenterStyle.alignment = TextAnchor.MiddleCenter;
+            bigCenterStyle.normal.textColor = Color.white;
+        }
+
         GUI.Box(new Rect(10, 10, 220, 80), "");
         GUI.Label(new Rect(20, 15, 200, 35), "SCORE  " + score, hudStyle);
         GUI.Label(new Rect(20, 50, 200, 35), "COMBO  " + combo, hudStyle);
+
+        if (isGameOver)
+        {
+            float w = 420, h = 160;
+            Rect box = new Rect((Screen.width - w) / 2, (Screen.height - h) / 2, w, h);
+            GUI.Box(box, "");
+            GUI.Label(new Rect(box.x, box.y + 15, w, 50), "GAME OVER", bigCenterStyle);
+            GUI.Label(new Rect(box.x, box.y + 75, w, 35), "FINAL SCORE  " + score, hudStyle);
+            GUI.Label(new Rect(box.x, box.y + 110, w, 35), "BEST COMBO  " + maxCombo, hudStyle);
+        }
     }
 }
