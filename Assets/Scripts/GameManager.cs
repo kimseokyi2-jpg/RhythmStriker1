@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,6 +17,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Hit / Miss 반응")]
     public ParticleSystem hitEffect;  // 성공 판정 순간 이펙트 (비워두면 생략)
+    public Camera reactionCamera;     // 성공 시 살짝 펀치감을 줄 카메라 (비우면 Camera.main)
+    public float cameraPunchDistance = 0.15f;
+    public float cameraPunchDuration = 0.12f;
+
+    [Header("점수")]
+    public int scorePerHit = 100;
+    public int comboBonusPerHit = 10; // 콤보 1당 추가 점수
 
     [Header("공")]
     public GameObject ballPrefab;     // 박자마다 새로 생성할 공 프리팹
@@ -32,7 +40,11 @@ public class GameManager : MonoBehaviour
     private Vector3 characterOriginalScale;
     private Vector3 goalkeeperOriginalScale;
     private int combo = 0;
+    private int score = 0;
+    private int maxCombo = 0;
     private BallController currentBall; // 지금 대기 중인, 아직 안 찬 공
+    private Vector3 cameraOriginalPosition;
+    private Coroutine cameraPunchRoutine;
 
     void Start()
     {
@@ -49,6 +61,11 @@ public class GameManager : MonoBehaviour
 
         if (goalkeeper != null)
             goalkeeperOriginalScale = goalkeeper.localScale;
+
+        if (reactionCamera == null)
+            reactionCamera = Camera.main;
+        if (reactionCamera != null)
+            cameraOriginalPosition = reactionCamera.transform.localPosition;
     }
 
     void Update()
@@ -126,12 +143,35 @@ public class GameManager : MonoBehaviour
     void Hit()
     {
         combo++;
+        if (combo > maxCombo) maxCombo = combo;
+        score += scorePerHit + comboBonusPerHit * (combo - 1);
 
         if (hitEffect != null)
             hitEffect.Play();
 
         if (characterAnimator != null)
             characterAnimator.SetTrigger("shoot");
+
+        if (reactionCamera != null)
+        {
+            if (cameraPunchRoutine != null) StopCoroutine(cameraPunchRoutine);
+            cameraPunchRoutine = StartCoroutine(CameraPunch());
+        }
+    }
+
+    IEnumerator CameraPunch()
+    {
+        Vector3 punchPos = cameraOriginalPosition + Vector3.back * cameraPunchDistance;
+        float t = 0f;
+        while (t < cameraPunchDuration)
+        {
+            t += Time.deltaTime;
+            float p = t / cameraPunchDuration;
+            reactionCamera.transform.localPosition = Vector3.Lerp(punchPos, cameraOriginalPosition, p);
+            yield return null;
+        }
+        reactionCamera.transform.localPosition = cameraOriginalPosition;
+        cameraPunchRoutine = null;
     }
 
     // 슛 애니메이션의 "발이 공에 닿는 프레임"에 Animation Event로 이 메서드를 호출
@@ -159,5 +199,21 @@ public class GameManager : MonoBehaviour
             currentBall.Fumble();
             currentBall = null; // 이 공도 빗나간 채로 남고, 다음 박자에 새 공이 생김
         }
+    }
+
+    private GUIStyle hudStyle;
+
+    void OnGUI()
+    {
+        if (hudStyle == null)
+        {
+            hudStyle = new GUIStyle(GUI.skin.label);
+            hudStyle.fontSize = 28;
+            hudStyle.normal.textColor = Color.white;
+        }
+
+        GUI.Box(new Rect(10, 10, 220, 80), "");
+        GUI.Label(new Rect(20, 15, 200, 35), "SCORE  " + score, hudStyle);
+        GUI.Label(new Rect(20, 50, 200, 35), "COMBO  " + combo, hudStyle);
     }
 }
