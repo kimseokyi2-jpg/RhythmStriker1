@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d8
+guid: a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 500000005
-    second: logo_rhythm_striker_0
+      213: 500000006
+    second: scoreboard_frame_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,13 +102,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: logo_rhythm_striker_0
+      name: scoreboard_frame_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 377
-        height: 178
+        width: 2119
+        height: 742
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -118,7 +118,7 @@ TextureImporter:
       tessellationDetail: -1
       bones: []
       spriteID: 
-      internalID: 500000005
+      internalID: 500000006
       vertices: []
       indices: 
       edges: []

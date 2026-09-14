@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,6 +25,8 @@ public class GameManager : MonoBehaviour
     [Header("점수")]
     public int scorePerHit = 100;
     public int comboBonusPerHit = 10; // 콤보 1당 추가 점수
+    public TextMeshProUGUI scoreText; // 점수판 이미지 위에 겹쳐 표시할 실제 점수 텍스트
+    public TextMeshProUGUI comboText;
 
     [Header("게임 오버")]
     public int missLimit = 3;               // 연속 미스 허용 횟수
@@ -63,6 +66,13 @@ public class GameManager : MonoBehaviour
         isGameOver = false;
         songTime = 0f;
         lastBeatTime = 0f;
+        UpdateHud();
+    }
+
+    void UpdateHud()
+    {
+        if (scoreText != null) scoreText.text = score.ToString();
+        if (comboText != null) comboText.text = combo.ToString();
     }
 
     void Start()
@@ -178,6 +188,8 @@ public class GameManager : MonoBehaviour
             if (cameraPunchRoutine != null) StopCoroutine(cameraPunchRoutine);
             cameraPunchRoutine = StartCoroutine(CameraPunch());
         }
+
+        UpdateHud();
     }
 
     IEnumerator CameraPunch()
@@ -227,6 +239,7 @@ public class GameManager : MonoBehaviour
     {
         combo = 0;
         missStreak++;
+        UpdateHud();
 
         if (missStreak >= missLimit)
             TriggerGameOver();
@@ -267,10 +280,6 @@ public class GameManager : MonoBehaviour
             bigCenterStyle.alignment = TextAnchor.MiddleCenter;
             bigCenterStyle.normal.textColor = Color.white;
         }
-
-        GUI.Box(new Rect(10, 10, 220, 80), "");
-        GUI.Label(new Rect(20, 15, 200, 35), "SCORE  " + score, hudStyle);
-        GUI.Label(new Rect(20, 50, 200, 35), "COMBO  " + combo, hudStyle);
 
         if (isGameOver)
         {
