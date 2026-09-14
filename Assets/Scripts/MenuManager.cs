@@ -6,6 +6,7 @@ public class MenuManager : MonoBehaviour
     public GameObject mainMenuPanel;
     public GameObject settingsPanel;
     public GameObject startPromptPanel; // "스페이스바를 눌러 시작"
+    public GameObject logo; // 인트로 화면 로고 (게임 시작 전까지만 표시)
 
     [Header("연결")]
     public GameManager gameManager;
@@ -33,6 +34,7 @@ public class MenuManager : MonoBehaviour
         if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (startPromptPanel != null) startPromptPanel.SetActive(false);
+        if (logo != null) logo.SetActive(true);
     }
 
     // "게임 시작" 버튼 OnClick에 연결
@@ -79,6 +81,7 @@ public class MenuManager : MonoBehaviour
     {
         waitingForStartInput = false;
         if (startPromptPanel != null) startPromptPanel.SetActive(false);
+        if (logo != null) logo.SetActive(false);
 
         if (gameManager != null)
             gameManager.enabled = true;
