@@ -7,6 +7,7 @@ public class MenuManager : MonoBehaviour
     public GameObject settingsPanel;
     public GameObject startPromptPanel; // "스페이스바를 눌러 시작"
     public GameObject logo; // 인트로 화면 로고 (게임 시작 전까지만 표시)
+    public GameObject scoreboardPanel; // 스코어/콤보 UI (게임 시작 후에만 표시)
 
     [Header("연결")]
     public GameManager gameManager;
@@ -35,6 +36,7 @@ public class MenuManager : MonoBehaviour
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (startPromptPanel != null) startPromptPanel.SetActive(false);
         if (logo != null) logo.SetActive(true);
+        if (scoreboardPanel != null) scoreboardPanel.SetActive(false);
     }
 
     // "게임 시작" 버튼 OnClick에 연결
@@ -82,6 +84,7 @@ public class MenuManager : MonoBehaviour
         waitingForStartInput = false;
         if (startPromptPanel != null) startPromptPanel.SetActive(false);
         if (logo != null) logo.SetActive(false);
+        if (scoreboardPanel != null) scoreboardPanel.SetActive(true);
 
         if (gameManager != null)
             gameManager.enabled = true;
