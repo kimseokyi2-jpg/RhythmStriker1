@@ -17,11 +17,27 @@ public class MenuManager : MonoBehaviour
     public AudioSource uiAudioSource; // 클릭음 재생용 (비워두면 자동으로 하나 추가)
     public AudioClip clickSound;
 
+    [Header("로비 배경음 (삼바 + 관중 환호, 동시 재생)")]
+    public AudioClip lobbyMusicClip;
+    public AudioClip lobbyCheerClip;
+    private AudioSource cheerSource;
+
     void Awake()
     {
         if (uiAudioSource == null)
             uiAudioSource = gameObject.AddComponent<AudioSource>();
         uiAudioSource.playOnAwake = false;
+
+        if (musicSource == null)
+            musicSource = gameObject.AddComponent<AudioSource>();
+        musicSource.playOnAwake = false;
+        musicSource.loop = true;
+        musicSource.clip = lobbyMusicClip;
+
+        cheerSource = gameObject.AddComponent<AudioSource>();
+        cheerSource.playOnAwake = false;
+        cheerSource.loop = true;
+        cheerSource.clip = lobbyCheerClip;
     }
 
     // 버튼 OnClick에 연결해서 클릭음 재생
@@ -29,6 +45,20 @@ public class MenuManager : MonoBehaviour
     {
         if (clickSound != null && uiAudioSource != null)
             uiAudioSource.PlayOneShot(clickSound);
+    }
+
+    void PlayLobbyAmbience()
+    {
+        if (musicSource != null && musicSource.clip != null && !musicSource.isPlaying)
+            musicSource.Play();
+        if (cheerSource != null && cheerSource.clip != null && !cheerSource.isPlaying)
+            cheerSource.Play();
+    }
+
+    void StopLobbyAmbience()
+    {
+        if (musicSource != null) musicSource.Stop();
+        if (cheerSource != null) cheerSource.Stop();
     }
 
     private bool waitingForStartInput = false;
@@ -55,6 +85,7 @@ public class MenuManager : MonoBehaviour
         if (startPromptPanel != null) startPromptPanel.SetActive(false);
         if (logo != null) logo.SetActive(true);
         if (scoreboardPanel != null) scoreboardPanel.SetActive(false);
+        PlayLobbyAmbience();
     }
 
     // "게임 시작" 버튼 OnClick에 연결
@@ -103,6 +134,7 @@ public class MenuManager : MonoBehaviour
         if (startPromptPanel != null) startPromptPanel.SetActive(false);
         if (logo != null) logo.SetActive(false);
         if (scoreboardPanel != null) scoreboardPanel.SetActive(true);
+        StopLobbyAmbience();
 
         if (gameManager != null)
             gameManager.enabled = true;

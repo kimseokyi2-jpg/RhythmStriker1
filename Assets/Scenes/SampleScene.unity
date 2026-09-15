@@ -5067,6 +5067,8 @@ MonoBehaviour:
   musicSource: {fileID: 0}
   uiAudioSource: {fileID: 0}
   clickSound: {fileID: 8300000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f801, type: 3}
+  lobbyMusicClip: {fileID: 8300000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f802, type: 3}
+  lobbyCheerClip: {fileID: 8300000, guid: d4e5f6a7b8c9d0e1f2a3b4c5d6e7f803, type: 3}
 --- !u!4 &2064612332
 Transform:
   m_ObjectHideFlags: 0
