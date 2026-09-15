@@ -13,6 +13,24 @@ public class MenuManager : MonoBehaviour
     public GameManager gameManager;
     public AudioSource musicSource; // 설정 창에서 음량 조절할 음악 소스 (비워두면 생략)
 
+    [Header("UI 효과음")]
+    public AudioSource uiAudioSource; // 클릭음 재생용 (비워두면 자동으로 하나 추가)
+    public AudioClip clickSound;
+
+    void Awake()
+    {
+        if (uiAudioSource == null)
+            uiAudioSource = gameObject.AddComponent<AudioSource>();
+        uiAudioSource.playOnAwake = false;
+    }
+
+    // 버튼 OnClick에 연결해서 클릭음 재생
+    public void PlayClickSound()
+    {
+        if (clickSound != null && uiAudioSource != null)
+            uiAudioSource.PlayOneShot(clickSound);
+    }
+
     private bool waitingForStartInput = false;
 
     void Start()
