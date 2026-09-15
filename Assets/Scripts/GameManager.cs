@@ -32,6 +32,9 @@ public class GameManager : MonoBehaviour
     public int missLimit = 3;               // 연속 미스 허용 횟수
     public float gameOverDisplayDuration = 3f;
     public MenuManager menuManager;         // 게임오버 후 메인 메뉴로 돌려보낼 대상
+    public GameObject gameOverPanel;        // 게임오버 이미지 UI (평소엔 꺼둠)
+    public TextMeshProUGUI finalScoreText;
+    public TextMeshProUGUI bestComboText;
 
     [Header("공")]
     public GameObject ballPrefab;     // 박자마다 새로 생성할 공 프리팹
@@ -248,6 +251,11 @@ public class GameManager : MonoBehaviour
     void TriggerGameOver()
     {
         isGameOver = true;
+
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        if (finalScoreText != null) finalScoreText.text = score.ToString();
+        if (bestComboText != null) bestComboText.text = maxCombo.ToString();
+
         StartCoroutine(GameOverRoutine());
     }
 
@@ -255,40 +263,11 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(gameOverDisplayDuration);
 
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+
         if (menuManager != null)
             menuManager.ShowMainMenu();
 
         enabled = false;
-    }
-
-    private GUIStyle hudStyle;
-    private GUIStyle bigCenterStyle;
-
-    void OnGUI()
-    {
-        if (hudStyle == null)
-        {
-            hudStyle = new GUIStyle(GUI.skin.label);
-            hudStyle.fontSize = 28;
-            hudStyle.normal.textColor = Color.white;
-        }
-
-        if (bigCenterStyle == null)
-        {
-            bigCenterStyle = new GUIStyle(GUI.skin.label);
-            bigCenterStyle.fontSize = 42;
-            bigCenterStyle.alignment = TextAnchor.MiddleCenter;
-            bigCenterStyle.normal.textColor = Color.white;
-        }
-
-        if (isGameOver)
-        {
-            float w = 420, h = 160;
-            Rect box = new Rect((Screen.width - w) / 2, (Screen.height - h) / 2, w, h);
-            GUI.Box(box, "");
-            GUI.Label(new Rect(box.x, box.y + 15, w, 50), "GAME OVER", bigCenterStyle);
-            GUI.Label(new Rect(box.x, box.y + 75, w, 35), "FINAL SCORE  " + score, hudStyle);
-            GUI.Label(new Rect(box.x, box.y + 110, w, 35), "BEST COMBO  " + maxCombo, hudStyle);
-        }
     }
 }
