@@ -94,6 +94,7 @@ public class MenuManager : MonoBehaviour
     {
         if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
         if (startPromptPanel != null) startPromptPanel.SetActive(true);
+        if (logo != null) logo.SetActive(false);
         waitingForStartInput = true;
     }
 
