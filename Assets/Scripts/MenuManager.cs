@@ -27,6 +27,7 @@ public class MenuManager : MonoBehaviour
         if (uiAudioSource == null)
             uiAudioSource = gameObject.AddComponent<AudioSource>();
         uiAudioSource.playOnAwake = false;
+        uiAudioSource.volume = 0.5f; // SFX 슬라이더 기본값(50%)과 맞춤
 
         if (musicSource == null)
             musicSource = gameObject.AddComponent<AudioSource>();
@@ -109,13 +110,23 @@ public class MenuManager : MonoBehaviour
         ShowMainMenu();
     }
 
-    // 음량 슬라이더 OnValueChanged에 연결 (0~1)
+    // BGM 슬라이더 OnValueChanged에 연결 (0~1) - 로비 음악 + 관중 환호
     public void OnVolumeChanged(float value)
     {
         if (musicSource != null)
             musicSource.volume = value;
         else
             AudioListener.volume = value;
+
+        if (cheerSource != null)
+            cheerSource.volume = value;
+    }
+
+    // SFX 슬라이더 OnValueChanged에 연결 (0~1) - UI 클릭음
+    public void OnSfxVolumeChanged(float value)
+    {
+        if (uiAudioSource != null)
+            uiAudioSource.volume = value;
     }
 
     // "종료" 버튼 OnClick에 연결
